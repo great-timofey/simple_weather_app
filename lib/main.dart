@@ -115,8 +115,13 @@ class MyHomePage extends StatelessWidget {
 
   String renderTemperature(String temperature) {
     final temperatureDouble = double.parse(temperature);
+    print(temperature);
     return (temperatureDouble > 0 ? '+' : '-') +
-        temperature.substring(0, temperature.length - 1);
+        temperature.substring(
+            0,
+            (temperature.length > 4
+                ? temperature.length - 1
+                : temperature.length));
   }
 
   List<Widget> _renderCities(citiesToRender) => citiesToRender
