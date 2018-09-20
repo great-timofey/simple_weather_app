@@ -24,35 +24,36 @@ class CityTile extends StatelessWidget {
       ),
       children: <Widget>[
         Container(
-            padding: EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Padding(
-                        padding: EdgeInsets.only(right: 10.0),
-                        child: Text('Hourly:')),
-                    Column(children: [
-                      Text(city.forecast.hourlyForecast),
-                      Text(city.forecast.hourlyTemp)
-                    ])
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Padding(
-                        padding: EdgeInsets.only(right: 10.0),
-                        child: Text('Daily:')),
-                    Column(children: [
-                      Text('min ${city.forecast.dailyMinTemp}'),
-                      Text('max ${city.forecast.dailyMaxTemp}'),
-                    ])
-                  ],
-                )
-              ],
-            ))
+          padding: EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(right: 10.0),
+                      child: Text('Hourly:')),
+                  Column(children: [
+                    Text(city.forecast.hourlyForecast),
+                    Text(city.forecast.hourlyTemp)
+                  ])
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(right: 10.0),
+                      child: Text('Daily:')),
+                  Column(children: [
+                    Text('min ${city.forecast.dailyMinTemp}'),
+                    Text('max ${city.forecast.dailyMaxTemp}'),
+                  ])
+                ],
+              )
+            ],
+          ),
+        )
       ],
     );
   }
