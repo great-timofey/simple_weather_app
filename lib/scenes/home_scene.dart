@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:simple_weather_app/models/models.dart';
 import 'package:simple_weather_app/components/city_tile.dart';
 import 'package:simple_weather_app/utils/utils.dart';
+import 'package:location/location.dart';
 
 class HomeScene extends StatefulWidget {
   final cities;
@@ -19,6 +20,7 @@ class HomeScene extends StatefulWidget {
 class HomeSceneState extends State<HomeScene> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Future<Map<String, String>> _citiesData;
+  var _currentLocation;
   var _cities;
 
   @override
@@ -34,6 +36,7 @@ class HomeSceneState extends State<HomeScene> {
       return citiesData;
     });
     _cities = getCities(_citiesData);
+    getLocation();
   }
 
   List<Widget> _renderCities(citiesToRender) => citiesToRender
@@ -52,11 +55,39 @@ class HomeSceneState extends State<HomeScene> {
 
   getCity(String name, String coordinates) async {
     final forecastRawData = await http
-        .get('$darkskyPrefix/$darkskyApiKey/$coordinates?units=auto')
+        .get('$darkskyPrefix/$darkskyApiKey/$coordinates?units=si')
         .then((res) => json.decode(res.body));
     final forecast = Forecast.fromJson(forecastRawData);
     final city = City(name, forecast);
     return city;
+  }
+
+  void getLocation() async {
+    try {
+      Location _locationProvider = Location();
+      _currentLocation = await _locationProvider.getLocation();
+    } catch (e) {
+      _currentLocation = null;
+    }
+    print('current location is $_currentLocation');
+  }
+
+  String formatLocation() {
+    num lat = _currentLocation['latitude'];
+    num lon = _currentLocation['longitude'];
+    return '$lat,$lon';
+  }
+
+  void onCityAdd() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    await prefs.setString('Moscow', '55.7558,37.6173');
+    await prefs.setString('Dubai', '25.2048,55.2708');
+    await prefs.setString('Prague', '50.0755,14.4378');
+    await prefs.setString('Murmansk', '68.9585,33.0827');
+    if (_currentLocation != null) {
+      await prefs.setString('SOMEWHERE', formatLocation());
+    }
   }
 
   Widget build(BuildContext context) {
@@ -81,15 +112,7 @@ class HomeSceneState extends State<HomeScene> {
           }),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
-        onPressed: () async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          print('trying to add new city');
-          prefs.clear();
-          await prefs.setString('Moscow', '55.7558,37.6173');
-          await prefs.setString('Dubai', '25.2048,55.2708');
-          await prefs.setString('Prague', '50.0755,14.4378');
-          await prefs.setString('Murmansk', '68.9585,33.0827');
-        },
+        onPressed: onCityAdd,
       ),
     );
   }
