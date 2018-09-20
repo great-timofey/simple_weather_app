@@ -9,7 +9,7 @@ class CityTile extends StatelessWidget {
     return ExpansionTile(
       title: Container(
         child: Column(
-          children: [
+          children: <Widget>[
             Text(city.name,
                 style: TextStyle(fontSize: 35.0, fontWeight: FontWeight.w700)),
             Text(city.forecast.currentForecast,

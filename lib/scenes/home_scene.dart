@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert' show json;
+import 'package:flutter/material.dart';
+
+import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:simple_weather_app/models/models.dart';
-import 'package:simple_weather_app/components/city_tile.dart';
 import 'package:simple_weather_app/utils/utils.dart';
-import 'package:location/location.dart';
+import 'package:simple_weather_app/scenes/add_city_scene.dart';
+import 'package:simple_weather_app/components/city_tile.dart';
 
 class HomeScene extends StatefulWidget {
-  final cities;
-  HomeScene({Key key, this.cities}) : super(key: key);
+  HomeScene({Key key}) : super(key: key);
 
   @override
   HomeSceneState createState() => HomeSceneState();
@@ -88,6 +89,8 @@ class HomeSceneState extends State<HomeScene> {
     if (_currentLocation != null) {
       await prefs.setString('SOMEWHERE', formatLocation());
     }
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => AddCityScene()));
   }
 
   Widget build(BuildContext context) {
@@ -111,8 +114,8 @@ class HomeSceneState extends State<HomeScene> {
             }
           }),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
         onPressed: onCityAdd,
+        child: Icon(Icons.add),
       ),
     );
   }
