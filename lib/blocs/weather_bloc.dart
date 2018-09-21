@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert' show json;
 
 import 'package:rxdart/rxdart.dart';
+import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:simple_weather_app/utils/utils.dart';
@@ -11,34 +11,41 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherBloc {
   List<City> _cities = [];
-  Future<Map<String, String>> _citiesData;
-  final _citiesSubject = BehaviorSubject<List<City>>();
-  Stream<List<City>> get cities => _citiesSubject.stream;
+  Map<String, String> _citiesData;
+  Map<String, double> _currentLocation;
+  final _citiesSubject = BehaviorSubject<List<dynamic>>();
+  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  WeatherBloc() {
-    _getCities(_citiesData);
-    _citiesSubject.add(_cities);
+  Stream<bool> get isLoading => _isLoadingSubject.stream;
+  Stream<List<dynamic>> get cities => _citiesSubject.stream;
 
-    _citiesData = _prefs.then((SharedPreferences prefs) {
+  WeatherBloc() {
+    // print('bloc started');
+    _isLoadingSubject.add(true);
+    _getCities();
+    _getLocation();
+  }
+
+  _getCities() async {
+    await _prefs.then((SharedPreferences prefs) {
       final Set<String> keys = prefs.getKeys();
       Map<String, String> citiesData = Map.fromIterable(
         keys,
         key: (city) => city,
         value: (city) => prefs.getString(city),
       );
-      return citiesData;
+      _citiesData = citiesData;
     });
-  }
 
-  _getCities(Future<Map<String, String>> citiesMap) async {
     final List<Future> futureCities = [];
-    await citiesMap.then((cities) => cities
-        .forEach((name, coords) => futureCities.add(_getCity(name, coords))));
-    final resultCities = await Future.wait(futureCities);
+    _citiesData
+        .forEach((name, coords) => futureCities.add(_getCity(name, coords)));
+    final List<City> resultCities = List.from(await Future.wait(futureCities));
+
     _cities = resultCities;
-    print(_cities);
-    // return resultCities;
+    _citiesSubject.add((_cities));
+    _isLoadingSubject.add(false);
   }
 
   _getCity(String name, String coordinates) async {
@@ -51,43 +58,36 @@ class WeatherBloc {
   }
 
   String _formatLocation() {
-    // num lat = _currentLocation['latitude'];
-    // num lon = _currentLocation['longitude'];
-    // return '$lat,$lon';
+    num lat = _currentLocation['latitude'];
+    num lon = _currentLocation['longitude'];
+    return '$lat,$lon';
   }
 
-  void onCityAdd() async {
+  void _getLocation() async {
+    try {
+      Location _locationProvider = Location();
+      _currentLocation = await _locationProvider.getLocation();
+    } catch (e) {
+      _currentLocation = null;
+    }
+    // print('current location is $_currentLocation');
+  }
+
+  void addCity() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
     await prefs.setString('Moscow', '55.7558,37.6173');
     await prefs.setString('Dubai', '25.2048,55.2708');
     await prefs.setString('Prague', '50.0755,14.4378');
     await prefs.setString('Murmansk', '68.9585,33.0827');
-    // // if (_currentLocation != null) {
-    await prefs.setString('somewhere', _formatLocation());
-    // }
+    if (_currentLocation != null) {
+      await prefs.setString('somewhere', _formatLocation());
+    }
   }
 
-  void onCityRemove(String cityName) async {
+  void removeCity(String cityName) async {
+    _isLoadingSubject.add(true);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(cityName);
-    // try {
     await prefs.remove(cityName);
-    // print(_cities);
-    // Scaffold.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text('$cityName was successfully deleted'),
-    //   ),
-    // );
-    // print('removed $cityName');
-    // } catch (e) {
-    // Scaffold.of(context).showSnackBar(
-    //   SnackBar(
-    //     backgroundColor: Colors.red,
-    //     content: Text('$cityName was successfully deleted'),
-    //   ),
-    // );
-    // print(e);
-    // }
+    _getCities();
   }
 }
