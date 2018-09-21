@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 
-import 'package:simple_weather_app/components/add_city_card.dart';
 import 'package:simple_weather_app/utils/utils.dart';
+import 'package:simple_weather_app/components/add_city_card.dart';
 
 class AddCityScene extends StatefulWidget {
   AddCityScene({Key key}) : super(key: key);
@@ -61,7 +61,6 @@ class _AddCitydSceneState extends State<AddCityScene> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[],
         title: Stack(
           children: [
             TextField(
