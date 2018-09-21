@@ -75,7 +75,7 @@ class _AddCitydSceneState extends State<AddCityScene> {
                     const Radius.circular(5.0),
                   ),
                 ),
-                hintText: 'Enter city name...',
+                hintText: 'City you want to add...',
                 contentPadding: EdgeInsets.all(15.0),
               ),
             ),
