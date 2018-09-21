@@ -87,7 +87,7 @@ class HomeSceneState extends State<HomeScene> {
     await prefs.setString('Prague', '50.0755,14.4378');
     await prefs.setString('Murmansk', '68.9585,33.0827');
     if (_currentLocation != null) {
-      await prefs.setString('SOMEWHERE', formatLocation());
+      await prefs.setString('somewhere', formatLocation());
     }
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => AddCityScene()));
