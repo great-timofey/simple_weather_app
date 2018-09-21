@@ -45,9 +45,14 @@ class HomeSceneState extends State<HomeScene> {
                   stream: widget.bloc.cities,
                   initialData: [],
                   builder: (context, snapshot) {
-                    return ListView(
-                      children: snapshot.data.map<Widget>(_buildItem).toList(),
-                    );
+                    return ListView.separated(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (_, index) {
+                          return _buildItem(snapshot.data[index]);
+                        },
+                        separatorBuilder: (_, index) {
+                          return Divider(color: Colors.black, height: 0.0);
+                        });
                   },
                 );
         },
