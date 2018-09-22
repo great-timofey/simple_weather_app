@@ -27,7 +27,7 @@ class WeatherBloc {
     _getLocation();
   }
 
-  _getCitiesFromApi() async {
+  Future<Null> _getCitiesFromApi() async {
     final List<Future> futureCities = [];
     _persistedCities
         .forEach((name, coords) => futureCities.add(_getCity(name, coords)));
@@ -38,7 +38,7 @@ class WeatherBloc {
     _isLoadingSubject.add(false);
   }
 
-  _getCitiesFromPrefs() async {
+  Future<Null> _getCitiesFromPrefs() async {
     SharedPreferences prefs = await _prefs;
     final Set<String> keys = prefs.getKeys();
     _convertPrefsToPersistedCities(
@@ -57,7 +57,7 @@ class WeatherBloc {
     _persistedCities = persistedCities;
   }
 
-  _getCity(String name, String coordinates) async {
+  Future<City> _getCity(String name, String coordinates) async {
     final forecastRawData = await http
         .get('$darkskyPrefix/$darkskyApiKey/$coordinates?units=si')
         .then((res) => json.decode(res.body));
@@ -83,30 +83,35 @@ class WeatherBloc {
   }
 
   void addCity() async {
-    if (_cities.length != _persistedCities.length) {
-      _isLoadingSubject.add(true);
-      SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
-      final Set<String> refreshedKeys = refreshedPrefs.getKeys();
-      final List<Future> citiesToUpdate = [];
-      refreshedKeys.map((key) {
-        if (_persistedCities.containsKey(key) == false)
-          citiesToUpdate.add(
-              refreshedPrefs.setString(key, refreshedPrefs.getString(key)));
-      });
-      await Future.wait(citiesToUpdate);
-      _convertPrefsToPersistedCities(
-        refreshedKeys,
-        refreshedPrefs,
-      );
-      _getCitiesFromApi();
-      // await prefs.setString('Moscow', '55.7558,37.6173');
-      // await prefs.setString('Dubai', '25.2048,55.2708');
-      // await prefs.setString('Prague', '50.0755,14.4378');
-      // await prefs.setString('Murmansk', '68.9585,33.0827');
-      if (_currentLocation != null) {
-        // await prefs.setString('somewhere', _formatLocation());
-      }
-    }
+    // print(_cities.length);
+    // print(_persistedCities.length);
+    // // TODO: check this new update cities logic
+    // if (_cities.length != _persistedCities.length) {
+    // _isLoadingSubject.add(true);
+    SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
+    // final Set<String> refreshedKeys = refreshedPrefs.getKeys();
+    // final List<Future> citiesToUpdate = [];
+    // refreshedKeys.map((key) {
+    //   if (_persistedCities.containsKey(key) == false)
+    //     citiesToUpdate
+    //         .add(refreshedPrefs.setString(key, refreshedPrefs.getString(key)));
+    // });
+    // await Future.wait(citiesToUpdate);
+    // _convertPrefsToPersistedCities(
+    //   refreshedKeys,
+    //   refreshedPrefs,
+    // );
+    // _citiesSubject.add(_cities);
+    // _isLoadingSubject.add(false);
+    // // _getCitiesFromApi();
+    await refreshedPrefs.setString('Moscow', '55.7558,37.6173');
+    await refreshedPrefs.setString('Dubai', '25.2048,55.2708');
+    await refreshedPrefs.setString('Prague', '50.0755,14.4378');
+    await refreshedPrefs.setString('Murmansk', '68.9585,33.0827');
+    // if (_currentLocation != null) {
+    //   // await prefs.setString('somewhere', _formatLocation());
+    // }
+    // }
   }
 
   void removeCity(String cityName) async {
