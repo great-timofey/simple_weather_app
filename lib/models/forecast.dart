@@ -9,11 +9,11 @@ class Forecast {
   List<dynamic> get gethourlyForecastsForNext12Hours => hourlyForecasts;
   Map<String, dynamic> get getforecastsForNext5Days => next5DaysForecasts;
 
-  Forecast.fromJson(
-    Map<String, dynamic> rawCurrent,
-    List<dynamic> rawNext12Hours,
-    Map<String, dynamic> rawNext5Days,
-  ) {
+  Forecast.fromJson({
+    @required Map<String, dynamic> rawCurrent,
+    @required List<dynamic> rawNext12Hours,
+    @required Map<String, dynamic> rawNext5Days,
+  }) {
     this.currentConditions = getCurrentData(
         source: rawCurrent, filters: ['WeatherText', 'Temperature']);
     this.hourlyForecasts = getHourlyData(rawNext12Hours);
@@ -27,7 +27,15 @@ class Forecast {
     Map<String, dynamic> result;
     result = Map.fromIterable(
       source.keys.where((key) => filters.contains(key)),
-      value: (key) => source[key],
+      value: (key) {
+        final current = source[key];
+        switch (key) {
+          case ('Temperature'):
+            return parseTemperatures(current);
+          default:
+            return current;
+        }
+      },
     );
 
     return result;
@@ -38,10 +46,21 @@ class Forecast {
   ) {
     List<dynamic> result = [];
     List<String> filters = ['IconPhrase', 'Temperature'];
-    source.asMap().forEach((index, value) => result.add(Map.fromIterable(
-          source[index].keys.where((key) => filters.contains(key)),
-          value: (key) => source[index][key],
-        )));
+    source.asMap().forEach(
+          (index, value) => result.add(
+                Map.fromIterable(
+                    source[index].keys.where((key) => filters.contains(key)),
+                    value: (key) {
+                  final current = source[index][key];
+                  switch (key) {
+                    case ('Temperature'):
+                      return getTemperature(current['Value']);
+                    default:
+                      return current;
+                  }
+                }),
+              ),
+        );
 
     return result;
   }
@@ -63,11 +82,7 @@ class Forecast {
                 final current = source['DailyForecasts'][index][key];
                 switch (key) {
                   case ('Temperature'):
-                    Map<String, String> temperatures = {};
-                    temperatures = Map.fromIterable(current.keys,
-                        value: (innerKey) =>
-                            getTemperature(current[innerKey]['Value']));
-                    return temperatures;
+                    return parseTemperatures(current);
                   default:
                     return current['IconPhrase'];
                 }
@@ -78,6 +93,13 @@ class Forecast {
     return result;
   }
 
+  dynamic parseTemperatures(Map temperaturesMap) {
+    Map<String, String> temperatures = Map.fromIterable(temperaturesMap.keys,
+        value: (innerKey) =>
+            getTemperature(temperaturesMap[innerKey]['Value']));
+    return temperatures;
+  }
+
   String getTemperature(num temperature) {
     final strTemp = temperature.toStringAsFixed(1);
     return (temperature > 0 ? '+' : '-') + strTemp;
@@ -85,6 +107,6 @@ class Forecast {
 
   @override
   String toString() {
-    return 'current - $currentConditions \n hourly - $hourlyForecasts \n daily = $next5DaysForecasts';
+    return 'current:$currentConditions \n hourly:$hourlyForecasts \n daily:$next5DaysForecasts';
   }
 }
