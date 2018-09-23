@@ -5,9 +5,9 @@ class Forecast {
   Map<String, dynamic> currentConditions = Map();
   Map<String, dynamic> next5DaysForecasts = Map();
 
-  Map<String, dynamic> get currentForecast => currentConditions;
-  List<dynamic> get gethourlyForecastsForNext12Hours => hourlyForecasts;
-  Map<String, dynamic> get getforecastsForNext5Days => next5DaysForecasts;
+  Map<String, dynamic> get current => currentConditions;
+  List<dynamic> get hourly => hourlyForecasts;
+  Map<String, dynamic> get daily => next5DaysForecasts;
 
   Forecast.fromJson({
     @required Map<String, dynamic> rawCurrent,

@@ -58,35 +58,40 @@ class WeatherBloc {
   }
 
   Future<City> _getCity(String cityName, String locationKey) async {
-    final rawCurrentForecast = await http
-        .get(
-            '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
-        .then((res) => json.decode(res.body));
+    final rawCurrentForecast = json.decode(fakeCurrentReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
+    //     .then((res) => json.decode(res.body));
 
-    final rawNext5DaysForecast = await http
-        .get(
-            '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
-        .then((res) => json.decode(res.body));
-    final rawNext12HoursForecast = await http
-        .get(
-            '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
-        .then((res) => json.decode(res.body));
+    final rawNext5DaysForecast = json.decode(fakeNext5DaysReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
+    final rawNext12HoursForecast = json.decode(fakeNext12HoursReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
 
     final forecast = Forecast.fromJson(
-      rawCurrentForecast[0],
-      rawNext12HoursForecast,
-      rawNext5DaysForecast,
+      rawCurrent: rawCurrentForecast[0],
+      rawNext5Days: rawNext5DaysForecast,
+      rawNext12Hours: rawNext12HoursForecast,
     );
+
     final city = City(cityName, forecast);
-    print(city);
+
+    // print(city);
     return city;
   }
 
-  String _formatLocation() {
-    num lat = _currentLocation['latitude'];
-    num lon = _currentLocation['longitude'];
-    return '$lat,$lon';
-  }
+  // String _formatLocation() {
+  //   num lat = _currentLocation['latitude'];
+  //   num lon = _currentLocation['longitude'];
+  //   return '$lat,$lon';
+  // }
 
   void _getLocation() async {
     try {
@@ -95,13 +100,15 @@ class WeatherBloc {
     } catch (e) {
       _currentLocation = null;
     }
-    print('current location is $_currentLocation');
+    // print('current location is $_currentLocation');
   }
 
   void addCity() async {
     SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
     await refreshedPrefs.clear();
     refreshedPrefs.setString('New York', '349727');
+    _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
+    // _citiesSubject.add(_cities);
   }
 
   void removeCity(String cityName) async {
