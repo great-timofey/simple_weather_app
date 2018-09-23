@@ -1,26 +1,81 @@
+import 'package:meta/meta.dart';
+
 class Forecast {
-  List<String> now = [];
-  List<String> hourly = [];
-  List<String> daily = [];
+  List<dynamic> hourlyForecasts = List();
+  Map<String, dynamic> currentConditions = Map();
+  Map<String, dynamic> next5DaysForecasts = Map();
 
-  String get currentTemp => now[0];
-  String get currentForecast => now[1];
-  String get hourlyTemp => hourly[0];
-  String get hourlyForecast => hourly[1];
-  String get dailyMinTemp => daily[0];
-  String get dailyMaxTemp => daily[1];
+  Map<String, dynamic> get currentForecast => currentConditions;
+  List<dynamic> get gethourlyForecastsForNext12Hours => hourlyForecasts;
+  Map<String, dynamic> get getforecastsForNext5Days => next5DaysForecasts;
 
-  Forecast(this.now, this.hourly, this.daily);
-  Forecast.fromJson(Map<String, dynamic> rawForecast) {
-    this.now = List.from(now)
-      ..add(getTemperature(rawForecast['currently']['temperature']))
-      ..add(rawForecast['currently']['summary']);
-    this.hourly = List.from(hourly)
-      ..add(getTemperature(rawForecast['hourly']['data'][0]['temperature']))
-      ..add(rawForecast['hourly']['data'][0]['summary']);
-    this.daily = List.from(daily)
-      ..add(getTemperature(rawForecast['daily']['data'][0]['temperatureLow']))
-      ..add(getTemperature(rawForecast['daily']['data'][0]['temperatureHigh']));
+  Forecast.fromJson(
+    Map<String, dynamic> rawCurrent,
+    List<dynamic> rawNext12Hours,
+    Map<String, dynamic> rawNext5Days,
+  ) {
+    this.currentConditions = getCurrentData(
+        source: rawCurrent, filters: ['WeatherText', 'Temperature']);
+    this.hourlyForecasts = getHourlyData(rawNext12Hours);
+    this.next5DaysForecasts = getDailyData(rawNext5Days);
+  }
+
+  Map<String, dynamic> getCurrentData({
+    @required Map<String, dynamic> source,
+    @required List<String> filters,
+  }) {
+    Map<String, dynamic> result;
+    result = Map.fromIterable(
+      source.keys.where((key) => filters.contains(key)),
+      value: (key) => source[key],
+    );
+
+    return result;
+  }
+
+  List<dynamic> getHourlyData(
+    List<dynamic> source,
+  ) {
+    List<dynamic> result = [];
+    List<String> filters = ['IconPhrase', 'Temperature'];
+    source.asMap().forEach((index, value) => result.add(Map.fromIterable(
+          source[index].keys.where((key) => filters.contains(key)),
+          value: (key) => source[index][key],
+        )));
+
+    return result;
+  }
+
+  Map<String, dynamic> getDailyData(
+    Map<String, dynamic> source,
+  ) {
+    Map<String, dynamic> result = {};
+    result['Overview'] = source['Headline']['Text'];
+    List<dynamic> dailyForecastsToAdd = [];
+    List<String> filters = ['Day', 'Night', 'Temperature'];
+    source['DailyForecasts']
+        .asMap()
+        .forEach((index, value) => dailyForecastsToAdd.add(Map.fromIterable(
+              source['DailyForecasts'][index]
+                  .keys
+                  .where((key) => filters.contains(key)),
+              value: (key) {
+                final current = source['DailyForecasts'][index][key];
+                switch (key) {
+                  case ('Temperature'):
+                    Map<String, String> temperatures = {};
+                    temperatures = Map.fromIterable(current.keys,
+                        value: (innerKey) =>
+                            getTemperature(current[innerKey]['Value']));
+                    return temperatures;
+                  default:
+                    return current['IconPhrase'];
+                }
+              },
+            )));
+    result['DailyForecasts'] = dailyForecastsToAdd;
+
+    return result;
   }
 
   String getTemperature(num temperature) {
@@ -30,6 +85,6 @@ class Forecast {
 
   @override
   String toString() {
-    return '$now - $hourly - $daily';
+    return 'current - $currentConditions \n hourly - $hourlyForecasts \n daily = $next5DaysForecasts';
   }
 }
