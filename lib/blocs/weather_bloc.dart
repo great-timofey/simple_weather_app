@@ -21,7 +21,7 @@ class WeatherBloc {
   Stream<List<City>> get cities => _citiesSubject.stream;
 
   WeatherBloc() {
-    // print('bloc started');
+    print('bloc started');
     _isLoadingSubject.add(true);
     _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     _getLocation();
@@ -29,8 +29,8 @@ class WeatherBloc {
 
   Future<Null> _getCitiesFromApi() async {
     final List<Future> futureCities = [];
-    _persistedCities
-        .forEach((name, coords) => futureCities.add(_getCity(name, coords)));
+    _persistedCities.forEach((cityName, locationKey) =>
+        futureCities.add(_getCity(cityName, locationKey)));
     final List<City> resultCities = List.from(await Future.wait(futureCities));
 
     _cities = resultCities;
@@ -57,20 +57,41 @@ class WeatherBloc {
     _persistedCities = persistedCities;
   }
 
-  Future<City> _getCity(String name, String coordinates) async {
-    final forecastRawData = await http
-        .get('$darkskyPrefix/$darkskyApiKey/$coordinates?units=si')
-        .then((res) => json.decode(res.body));
-    final forecast = Forecast.fromJson(forecastRawData);
-    final city = City(name, forecast);
+  Future<City> _getCity(String cityName, String locationKey) async {
+    final rawCurrentForecast = json.decode(fakeCurrentReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
+    //     .then((res) => json.decode(res.body));
+
+    final rawNext5DaysForecast = json.decode(fakeNext5DaysReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
+    final rawNext12HoursForecast = json.decode(fakeNext12HoursReq);
+    // await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
+
+    final forecast = Forecast.fromJson(
+      rawCurrent: rawCurrentForecast[0],
+      rawNext5Days: rawNext5DaysForecast,
+      rawNext12Hours: rawNext12HoursForecast,
+    );
+
+    final city = City(cityName, forecast);
+
+    // print(city);
     return city;
   }
 
-  String _formatLocation() {
-    num lat = _currentLocation['latitude'];
-    num lon = _currentLocation['longitude'];
-    return '$lat,$lon';
-  }
+  // String _formatLocation() {
+  //   num lat = _currentLocation['latitude'];
+  //   num lon = _currentLocation['longitude'];
+  //   return '$lat,$lon';
+  // }
 
   void _getLocation() async {
     try {
@@ -79,39 +100,15 @@ class WeatherBloc {
     } catch (e) {
       _currentLocation = null;
     }
-    print('current location is $_currentLocation');
+    // print('current location is $_currentLocation');
   }
 
   void addCity() async {
-    // print(_cities.length);
-    // print(_persistedCities.length);
-    // // TODO: check this new update cities logic
-    // if (_cities.length != _persistedCities.length) {
-    // _isLoadingSubject.add(true);
     SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
-    // final Set<String> refreshedKeys = refreshedPrefs.getKeys();
-    // final List<Future> citiesToUpdate = [];
-    // refreshedKeys.map((key) {
-    //   if (_persistedCities.containsKey(key) == false)
-    //     citiesToUpdate
-    //         .add(refreshedPrefs.setString(key, refreshedPrefs.getString(key)));
-    // });
-    // await Future.wait(citiesToUpdate);
-    // _convertPrefsToPersistedCities(
-    //   refreshedKeys,
-    //   refreshedPrefs,
-    // );
+    await refreshedPrefs.clear();
+    refreshedPrefs.setString('New York', '349727');
+    _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     // _citiesSubject.add(_cities);
-    // _isLoadingSubject.add(false);
-    // // _getCitiesFromApi();
-    await refreshedPrefs.setString('Moscow', '55.7558,37.6173');
-    await refreshedPrefs.setString('Dubai', '25.2048,55.2708');
-    await refreshedPrefs.setString('Prague', '50.0755,14.4378');
-    await refreshedPrefs.setString('Murmansk', '68.9585,33.0827');
-    // if (_currentLocation != null) {
-    //   // await prefs.setString('somewhere', _formatLocation());
-    // }
-    // }
   }
 
   void removeCity(String cityName) async {
