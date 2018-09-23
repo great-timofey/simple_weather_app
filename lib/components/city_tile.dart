@@ -40,7 +40,8 @@ class CityTile extends StatelessWidget {
         child: ExpansionTile(
           trailing: Container(
             child: Text(
-              city.forecast.currentTemp,
+              'bal',
+              // city.forecast.currentTemp,
               style: TextStyle(
                 fontSize: 35.0,
                 fontWeight: FontWeight.w900,
@@ -65,7 +66,8 @@ class CityTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      city.forecast.currentForecast,
+                      'sdf',
+                      // city.forecast.currentForecast,
                       style: TextStyle(
                         fontSize: 18.0,
                         fontStyle: FontStyle.italic,
@@ -89,8 +91,8 @@ class CityTile extends StatelessWidget {
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text('Hourly:')),
                       Column(children: [
-                        Text(city.forecast.hourlyForecast),
-                        Text(city.forecast.hourlyTemp)
+                        // Text(city.forecast.hourlyForecast),
+                        // Text(city.forecast.hourlyTemp)
                       ])
                     ],
                   ),
@@ -101,8 +103,8 @@ class CityTile extends StatelessWidget {
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text('Daily:')),
                       Column(children: [
-                        Text('min ${city.forecast.dailyMinTemp}'),
-                        Text('max ${city.forecast.dailyMaxTemp}'),
+                        // Text('min ${city.forecast.dailyMinTemp}'),
+                        // Text('max ${city.forecast.dailyMaxTemp}'),
                       ])
                     ],
                   )
