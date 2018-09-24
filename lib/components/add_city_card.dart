@@ -10,24 +10,27 @@ class AddCityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 5.0),
-            child: RaisedButton(
-                onPressed: () => onCityChoose(name, cityKey),
-                child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      '$name : $country',
-                      style: TextStyle(
-                        fontSize: 20.0,
-                      ),
-                    ))),
+    return RaisedButton(
+      onPressed: () => onCityChoose(name, cityKey),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+          Text(
+            country,
+            style: TextStyle(
+              fontSize: 18.0,
+              fontStyle: FontStyle.italic,
+            ),
+          )
+        ],
+      ),
     );
   }
 }

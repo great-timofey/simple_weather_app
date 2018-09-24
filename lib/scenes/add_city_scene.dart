@@ -34,6 +34,13 @@ class _AddCitydSceneState extends State<AddCityScene> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: BackButtonIcon(),
+            onPressed: () {
+              widget.bloc.suggestionsSink.add('');
+              Navigator.of(context).pop();
+            },
+          ),
           title: Stack(
             children: [
               TextField(
@@ -75,14 +82,12 @@ class _AddCitydSceneState extends State<AddCityScene> {
                       stream: widget.bloc.suggestions,
                       initialData: [],
                       builder: (context, snapshot) {
-                        return ListView.separated(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (_, index) {
-                              return _buildItem(snapshot.data[index]);
-                            },
-                            separatorBuilder: (_, index) {
-                              return Divider(color: Colors.black, height: 0.0);
-                            });
+                        return ListView.builder(
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (_, index) {
+                            return _buildItem(snapshot.data[index]);
+                          },
+                        );
                       },
                     );
             },
