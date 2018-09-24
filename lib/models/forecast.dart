@@ -16,8 +16,8 @@ class Forecast {
   }) {
     this.currentConditions = getCurrentData(
         source: rawCurrent, filters: ['WeatherText', 'Temperature']);
-    this.hourlyForecasts = getHourlyData(rawNext12Hours);
-    this.next5DaysForecasts = getDailyData(rawNext5Days);
+    this.hourlyForecasts = getData(source: rawNext12Hours, hourly: true);
+    this.next5DaysForecasts = getData(source: rawNext5Days, hourly: false);
   }
 
   Map<String, dynamic> getCurrentData({
@@ -41,55 +41,38 @@ class Forecast {
     return result;
   }
 
-  List<dynamic> getHourlyData(
-    List<dynamic> source,
-  ) {
-    List<dynamic> result = [];
-    List<String> filters = ['IconPhrase', 'Temperature'];
-    source.asMap().forEach(
-          (index, value) => result.add(
+  dynamic getData({@required bool hourly, @required dynamic source}) {
+    dynamic result;
+    List<String> filters;
+    List<dynamic> dailyForecastsToAdd = [];
+    if (hourly) {
+      result = List<dynamic>.from([]);
+      filters = ['IconPhrase', 'Temperature'];
+    } else {
+      result = Map<String, dynamic>.from({});
+      filters = ['Day', 'Night', 'Temperature'];
+    }
+    var toParse = hourly ? source : source['DailyForecasts'];
+    toParse.asMap().forEach(
+          (index, value) => (hourly ? result : dailyForecastsToAdd).add(
                 Map.fromIterable(
-                    source[index].keys.where((key) => filters.contains(key)),
+                    toParse[index].keys.where((key) => filters.contains(key)),
                     value: (key) {
-                  final current = source[index][key];
+                  final current = toParse[index][key];
                   switch (key) {
                     case ('Temperature'):
-                      return getTemperature(current['Value']);
+                      return hourly
+                          ? getTemperature(current['Value'])
+                          : parseTemperatures(current);
                     default:
-                      return current;
+                      return (hourly ? current : current['IconPhrase']);
                   }
                 }),
               ),
         );
-
-    return result;
-  }
-
-  Map<String, dynamic> getDailyData(
-    Map<String, dynamic> source,
-  ) {
-    Map<String, dynamic> result = {};
-    result['Overview'] = source['Headline']['Text'];
-    List<dynamic> dailyForecastsToAdd = [];
-    List<String> filters = ['Day', 'Night', 'Temperature'];
-    source['DailyForecasts']
-        .asMap()
-        .forEach((index, value) => dailyForecastsToAdd.add(Map.fromIterable(
-              source['DailyForecasts'][index]
-                  .keys
-                  .where((key) => filters.contains(key)),
-              value: (key) {
-                final current = source['DailyForecasts'][index][key];
-                switch (key) {
-                  case ('Temperature'):
-                    return parseTemperatures(current);
-                  default:
-                    return current['IconPhrase'];
-                }
-              },
-            )));
-    result['DailyForecasts'] = dailyForecastsToAdd;
-
+    if (!hourly) {
+      result['DailyForecasts'] = dailyForecastsToAdd;
+    }
     return result;
   }
 
