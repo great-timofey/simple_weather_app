@@ -15,11 +15,11 @@ class WeatherBloc {
   List<dynamic> _suggestions = [];
   Map<String, String> _persistedCities;
   Map<String, double> _currentLocation;
-  final _citiesSubject = BehaviorSubject<List<City>>();
   final suggestionsSink = PublishSubject<String>();
+  final _citiesSubject = BehaviorSubject<List<City>>();
+  final _suggestionsSubject = BehaviorSubject<List<dynamic>>();
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  final _suggestionsSubject = BehaviorSubject<List<dynamic>>();
 
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   Stream<List<City>> get cities => _citiesSubject.stream;
@@ -30,10 +30,10 @@ class WeatherBloc {
     _isLoadingSubject.add(true);
     _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     _getLocation();
-    _subscribeOnSearchInput();
+    _subscribeOnAutocompletion();
   }
 
-  void _subscribeOnSearchInput() {
+  void _subscribeOnAutocompletion() {
     suggestionsStream = suggestionsSink
         .distinct()
         .debounce(const Duration(milliseconds: 1000))
