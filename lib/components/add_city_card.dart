@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 @immutable
 class AddCityCard extends StatelessWidget {
   final String name;
-  final Function chooseCity;
-  AddCityCard({this.name, this.chooseCity});
+  final String country;
+  final String cityKey;
+  final Function onCityChoose;
+  AddCityCard({this.name, this.cityKey, this.country, this.onCityChoose});
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +16,13 @@ class AddCityCard extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 5.0),
             child: RaisedButton(
-                onPressed: () => chooseCity(name),
+                onPressed: () => onCityChoose(name, cityKey),
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Text(
-                      name,
+                      '$name : $country',
                       style: TextStyle(
                         fontSize: 20.0,
-                        fontStyle: FontStyle.italic,
                       ),
                     ))),
           ),

@@ -20,7 +20,6 @@ class HomeSceneState extends State<HomeScene> {
   }
 
   onCityAdd() {
-    widget.bloc.addCity();
     Navigator.push(
         context,
         MaterialPageRoute(

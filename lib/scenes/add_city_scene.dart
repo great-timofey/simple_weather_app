@@ -1,13 +1,10 @@
-import 'dart:async';
-import 'dart:convert' show json;
 import 'package:flutter/material.dart';
 
-import 'package:simple_weather_app/utils/utils.dart';
 import 'package:simple_weather_app/blocs/weather_bloc.dart';
 import 'package:simple_weather_app/components/add_city_card.dart';
 
 class AddCityScene extends StatefulWidget {
-  WeatherBloc bloc;
+  final WeatherBloc bloc;
   AddCityScene({this.bloc, Key key}) : super(key: key);
 
   @override
@@ -15,28 +12,22 @@ class AddCityScene extends StatefulWidget {
 }
 
 class _AddCitydSceneState extends State<AddCityScene> {
-  String _newCity;
-  List<String> _cities = [];
   final TextEditingController _controller = TextEditingController();
 
   Widget _buildItem(suggestion) => AddCityCard(
         name: suggestion['LocalizedName'],
-        chooseCity: _handleChooseCity,
+        country: suggestion['Country'],
+        cityKey: suggestion['Key'],
+        onCityChoose: _handleChooseCity,
       );
 
   void _handleInputClear() {
-    _cities.clear();
     _controller.clear();
-    print(_cities);
+    widget.bloc.suggestionsSink.add('');
   }
 
-  void _handleChooseCity(String chosenCity) {
-    _newCity = chosenCity;
-    print(_newCity);
-  }
-
-  void _handleChangeInput(String input) {
-    widget.bloc.searchCities(_controller.value.text);
+  void _handleChooseCity(String name, String cityKey) {
+    widget.bloc.addCity(name, cityKey);
   }
 
   @override
@@ -47,7 +38,7 @@ class _AddCitydSceneState extends State<AddCityScene> {
             children: [
               TextField(
                 controller: _controller,
-                onChanged: _handleChangeInput,
+                onChanged: widget.bloc.suggestionsSink.add,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
