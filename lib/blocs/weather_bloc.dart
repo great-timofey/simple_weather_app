@@ -10,27 +10,34 @@ import 'package:simple_weather_app/utils/utils.dart';
 import 'package:simple_weather_app/models/models.dart';
 
 class WeatherBloc {
+  var suggestionsStream;
   List<City> _cities = [];
   List<dynamic> _suggestions = [];
   Map<String, String> _persistedCities;
   Map<String, double> _currentLocation;
   final _citiesSubject = BehaviorSubject<List<City>>();
-  final _suggestionsSubject = BehaviorSubject<List<dynamic>>();
-  final _suggestionsCompletionSubject = BehaviorSubject<String>();
+  final suggestionsSink = PublishSubject<String>();
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final _suggestionsSubject = BehaviorSubject<List<dynamic>>();
 
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   Stream<List<City>> get cities => _citiesSubject.stream;
   Stream<List<dynamic>> get suggestions => _suggestionsSubject.stream;
-  // Stream<String> get
 
   WeatherBloc() {
     print('bloc started');
     _isLoadingSubject.add(true);
     _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     _getLocation();
-    // searchCities('dsfl');
+    _subscribeOnSearchInput();
+  }
+
+  void _subscribeOnSearchInput() {
+    suggestionsStream = suggestionsSink
+        .distinct()
+        .debounce(const Duration(milliseconds: 1000))
+        .listen((req) => _searchCities(req));
   }
 
   Future<Null> _getCitiesFromApi() async {
@@ -108,42 +115,26 @@ class WeatherBloc {
     // print('current location is $_currentLocation');
   }
 
-  searchCities(String request) async {
-    print('called');
-    _suggestionsCompletionSubject.stream
-        .distinct()
-        .debounce(const Duration(milliseconds: 1000))
-        .listen(print);
-    // print(request);
-//     final List<dynamic> rawRes = await http
-//         .get(
-//             '$accuweatherPrefix/v1/cities/autocomplete/?apikey=$accuweatherApiKey&q=saransk')
-//         .then((res) => json.decode(res.body));
+  _searchCities(String request) async {
+    _isLoadingSubject.add(true);
+    if (request is String && request.length > 0) {
+      // final rawRes = await http
+      //     .get(
+      //         '$accuweatherPrefix/v1/cities/autocomplete/?apikey=$accuweatherApiKey&q=$request')
+      //     .then((res) => json.decode(res.body));
 
-// print(rawRes);
-    final mock = json.encode([
-      {
-        'Version': 1,
-        'Key': "349727",
-        'Type': "City",
-        'Rank': 15,
-        'LocalizedName': "New York",
-        'Country': {'ID': "US", 'LocalizedName': "United States"},
-        'AdministrativeArea': {'ID': "NY", 'LocalizedName': "New York"}
-      },
-      {
-        'Version': 1,
-        'Key': "187745",
-        'Type': "City",
-        'Rank': 30,
-        'LocalizedName': "New Delhi",
-        'Country': {'ID': "IN", 'LocalizedName': "India"},
-        'AdministrativeArea': {'ID': "DL", 'LocalizedName': "Delhi"}
-      },
-    ]);
-    // json.decode(mock).forEach((item) => _suggestions.add(_getSuggestion(item)));
-    // print(_suggestions);
-    // _suggestionsSubject.add(_suggestions);
+      // print(rawRes);
+
+      json
+          // rawRes
+          .decode(fakeAutocompletionReq)
+          .forEach((item) => _suggestions.add(_getSuggestion(item)));
+      // print(_suggestions);
+      _suggestionsSubject.add(_suggestions);
+    } else {
+      _suggestions.clear();
+    }
+    _isLoadingSubject.add(false);
   }
 
   Map<String, String> _getSuggestion(Map<String, dynamic> source) {
@@ -166,11 +157,13 @@ class WeatherBloc {
     return result;
   }
 
-  void addCity() async {
+  void addCity(String name, String key) async {
     SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
     await refreshedPrefs.clear();
     refreshedPrefs.setString('New York', '349727');
-    _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
+    // refreshedPrefs.setString(name, key);
+    // print(refreshedPrefs.getKeys());
+    // _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     // _citiesSubject.add(_cities);
   }
 
@@ -179,6 +172,5 @@ class WeatherBloc {
     await prefs.remove(cityName);
     _cities.remove(_cities.firstWhere((city) => city.name == cityName));
     _citiesSubject.add(_cities);
-    // _citiesSubject.listen((onData) => print(_cities));
   }
 }
