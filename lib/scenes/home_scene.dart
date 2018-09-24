@@ -22,7 +22,11 @@ class HomeSceneState extends State<HomeScene> {
   onCityAdd() {
     widget.bloc.addCity();
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AddCityScene()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => AddCityScene(
+                  bloc: widget.bloc,
+                )));
   }
 
   onCityRemove(String cityName) {

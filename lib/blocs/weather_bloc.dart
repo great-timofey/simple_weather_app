@@ -11,20 +11,26 @@ import 'package:simple_weather_app/models/models.dart';
 
 class WeatherBloc {
   List<City> _cities = [];
+  List<dynamic> _suggestions = [];
   Map<String, String> _persistedCities;
   Map<String, double> _currentLocation;
   final _citiesSubject = BehaviorSubject<List<City>>();
+  final _suggestionsSubject = BehaviorSubject<List<dynamic>>();
+  final _suggestionsCompletionSubject = BehaviorSubject<String>();
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   Stream<List<City>> get cities => _citiesSubject.stream;
+  Stream<List<dynamic>> get suggestions => _suggestionsSubject.stream;
+  // Stream<String> get
 
   WeatherBloc() {
     print('bloc started');
     _isLoadingSubject.add(true);
     _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
     _getLocation();
+    // searchCities('dsfl');
   }
 
   Future<Null> _getCitiesFromApi() async {
@@ -91,7 +97,6 @@ class WeatherBloc {
   //   num lat = _currentLocation['latitude'];
   //   num lon = _currentLocation['longitude'];
   //   return '$lat,$lon';
-  // }
 
   void _getLocation() async {
     try {
@@ -101,6 +106,64 @@ class WeatherBloc {
       _currentLocation = null;
     }
     // print('current location is $_currentLocation');
+  }
+
+  searchCities(String request) async {
+    print('called');
+    _suggestionsCompletionSubject.stream
+        .distinct()
+        .debounce(const Duration(milliseconds: 1000))
+        .listen(print);
+    // print(request);
+//     final List<dynamic> rawRes = await http
+//         .get(
+//             '$accuweatherPrefix/v1/cities/autocomplete/?apikey=$accuweatherApiKey&q=saransk')
+//         .then((res) => json.decode(res.body));
+
+// print(rawRes);
+    final mock = json.encode([
+      {
+        'Version': 1,
+        'Key': "349727",
+        'Type': "City",
+        'Rank': 15,
+        'LocalizedName': "New York",
+        'Country': {'ID': "US", 'LocalizedName': "United States"},
+        'AdministrativeArea': {'ID': "NY", 'LocalizedName': "New York"}
+      },
+      {
+        'Version': 1,
+        'Key': "187745",
+        'Type': "City",
+        'Rank': 30,
+        'LocalizedName': "New Delhi",
+        'Country': {'ID': "IN", 'LocalizedName': "India"},
+        'AdministrativeArea': {'ID': "DL", 'LocalizedName': "Delhi"}
+      },
+    ]);
+    // json.decode(mock).forEach((item) => _suggestions.add(_getSuggestion(item)));
+    // print(_suggestions);
+    // _suggestionsSubject.add(_suggestions);
+  }
+
+  Map<String, String> _getSuggestion(Map<String, dynamic> source) {
+    Map<String, String> result = {};
+    List<String> filters = ['LocalizedName', 'Key', 'Country'];
+    result = Map.fromIterable(
+      source.keys.where((key) => filters.contains(key)),
+      value: (key) {
+        final current = source[key];
+        switch (key) {
+          case ('Country'):
+            return current['LocalizedName'];
+          default:
+            return current;
+        }
+      },
+    );
+    // print(result);
+
+    return result;
   }
 
   void addCity() async {
