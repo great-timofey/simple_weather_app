@@ -72,18 +72,19 @@ class WeatherBloc {
 
   Future<City> _getCity(String cityName, String locationKey) async {
     final rawCurrentForecast = json.decode(fakeCurrentReq);
-    // await http
+    // final rawCurrentForecast = await http
     //     .get(
     //         '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
     //     .then((res) => json.decode(res.body));
 
     final rawNext5DaysForecast = json.decode(fakeNext5DaysReq);
-    // await http
+    // final rawNext5DaysForecast = await http
     //     .get(
     //         '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
     //     .then((res) => json.decode(res.body));
+
     final rawNext12HoursForecast = json.decode(fakeNext12HoursReq);
-    // await http
+    // final rawNext12HoursForecast = await http
     //     .get(
     //         '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
     //     .then((res) => json.decode(res.body));
@@ -100,10 +101,11 @@ class WeatherBloc {
     return city;
   }
 
-  // String _formatLocation() {
-  //   num lat = _currentLocation['latitude'];
-  //   num lon = _currentLocation['longitude'];
-  //   return '$lat,$lon';
+  String _formatLocation() {
+    num lat = _currentLocation['latitude'];
+    num lon = _currentLocation['longitude'];
+    return '$lat,$lon';
+  }
 
   void _getLocation() async {
     try {
@@ -120,10 +122,8 @@ class WeatherBloc {
     if (request is String && request.length > 0) {
       // final rawRes = await http
       //     .get(
-      //         '$accuweatherPrefix/v1/cities/autocomplete/?apikey=$accuweatherApiKey&q=$request')
+      //         '$accuweatherPrefix/locations/v1/cities/autocomplete?apikey=$accuweatherApiKey&q=$request')
       //     .then((res) => json.decode(res.body));
-
-      // print(rawRes);
 
       json
           // rawRes
@@ -159,12 +159,12 @@ class WeatherBloc {
 
   void addCity(String name, String key) async {
     SharedPreferences refreshedPrefs = await SharedPreferences.getInstance();
-    await refreshedPrefs.clear();
-    refreshedPrefs.setString('New York', '349727');
-    // refreshedPrefs.setString(name, key);
+    // await refreshedPrefs.clear();
+    // refreshedPrefs.setString('New York', '349727');
+    refreshedPrefs.setString(name, key);
     // print(refreshedPrefs.getKeys());
-    // _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
-    // _citiesSubject.add(_cities);
+    _getCitiesFromPrefs().then((_) => _getCitiesFromApi());
+    _citiesSubject.add(_cities);
   }
 
   void removeCity(String cityName) async {

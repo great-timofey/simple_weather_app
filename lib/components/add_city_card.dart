@@ -25,7 +25,7 @@ class AddCityCard extends StatelessWidget {
           Text(
             country,
             style: TextStyle(
-              fontSize: 18.0,
+              fontSize: 16.0,
               fontStyle: FontStyle.italic,
             ),
           )
