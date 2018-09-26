@@ -71,23 +71,23 @@ class WeatherBloc {
   }
 
   Future<City> _getCity(String cityName, String locationKey) async {
-    // final rawCurrentForecast = json.decode(fakeCurrentReq);
-    final rawCurrentForecast = await http
-        .get(
-            '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
-        .then((res) => json.decode(res.body));
+    final rawCurrentForecast = json.decode(fakeCurrentReq);
+    // final rawCurrentForecast = await http
+    //     .get(
+    //         '$accuweatherPrefix/currentconditions/v1/$locationKey?apikey=$accuweatherApiKey')
+    //     .then((res) => json.decode(res.body));
 
-    // final rawNext5DaysForecast = json.decode(fakeNext5DaysReq);
-    final rawNext5DaysForecast = await http
-        .get(
-            '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
-        .then((res) => json.decode(res.body));
+    final rawNext5DaysForecast = json.decode(fakeNext5DaysReq);
+    // final rawNext5DaysForecast = await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/daily/5day/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
 
-    // final rawNext12HoursForecast = json.decode(fakeNext12HoursReq);
-    final rawNext12HoursForecast = await http
-        .get(
-            '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
-        .then((res) => json.decode(res.body));
+    final rawNext12HoursForecast = json.decode(fakeNext12HoursReq);
+    // final rawNext12HoursForecast = await http
+    //     .get(
+    //         '$accuweatherPrefix/forecasts/v1/hourly/12hour/$locationKey?apikey=$accuweatherApiKey&metric=true')
+    //     .then((res) => json.decode(res.body));
 
     final forecast = Forecast.fromJson(
       rawCurrent: rawCurrentForecast[0],
@@ -120,14 +120,14 @@ class WeatherBloc {
   _searchCities(String request) async {
     _isLoadingSubject.add(true);
     if (request is String && request.length > 0) {
-      final rawRes = await http
-          .get(
-              '$accuweatherPrefix/locations/v1/cities/autocomplete?apikey=$accuweatherApiKey&q=$request')
-          .then((res) => json.decode(res.body));
+      // final rawRes = await http
+      //     .get(
+      //         '$accuweatherPrefix/locations/v1/cities/autocomplete?apikey=$accuweatherApiKey&q=$request')
+      //     .then((res) => json.decode(res.body));
 
-      // json
-      rawRes
-          // .decode(fakeAutocompletionReq)
+      json
+          // rawRes
+          .decode(fakeAutocompletionReq)
           .forEach((item) => _suggestions.add(_getSuggestion(item)));
       // print(_suggestions);
       _suggestionsSubject.add(_suggestions);
